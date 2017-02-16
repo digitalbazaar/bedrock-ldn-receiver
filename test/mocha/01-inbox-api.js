@@ -12,6 +12,7 @@ const helpers = require('./helpers');
 const mockData = require('./mock.data');
 let request = require('request');
 request = request.defaults({json: true, strictSSL: false});
+const url = require('url');
 const uuid = require('uuid/v4');
 
 const testEndpoint = config.server.baseUri +
@@ -150,4 +151,167 @@ describe('bedrock-ldn-receiver inbox API', () => {
       });
     }); // end authenticated user
   }); // end get api
+
+  describe('getAll API', () => {
+    beforeEach(done => {
+      helpers.removeCollections([
+        config['ldn-inbox'].collections.inbox,
+        config['ldn-inbox'].collections.message
+      ], done);
+    });
+    describe('unauthenticated user', () => {
+      it('should return `PermissionDenied` error', done => {
+        request.get({
+          url: testEndpoint
+        }, (err, res) => {
+          expect(err).to.not.be.ok;
+          res.statusCode.should.equal(400);
+          res.body.type.should.equal('PermissionDenied');
+          done();
+        });
+      });
+    }); // end unauthenticated user
+    describe('authenticated regular user', () => {
+      it('should get inboxes', done => {
+        const mockIdentity = mockData.identities.regularUser;
+        const altIdentity = mockData.identities.altUser;
+        async.auto({
+          addThreeInboxes: callback => async.times(
+            3, (n, callback) => brLdnInbox.inboxes.add(
+              null, helpers.createRawInbox(mockData),
+              {owner: mockIdentity.identity.id}, callback), callback),
+          addTwoInboxes: callback => async.times(
+            2, (n, callback) => brLdnInbox.inboxes.add(
+              null, helpers.createRawInbox(mockData),
+              {owner: altIdentity.identity.id}, callback), callback),
+          get3: ['addThreeInboxes', 'addTwoInboxes', (results, callback) => {
+            const urlObj = {
+              protocol: 'https',
+              host: config.server.host,
+              pathname: config['ldn-receiver'].routes.inboxes,
+              query: {
+                owner: mockIdentity.identity.id
+              }
+            };
+            request.get(helpers.createHttpSignatureRequest({
+              url: url.format(urlObj),
+              identity: mockIdentity
+            }), (err, res, body) => {
+              expect(err).to.not.be.ok;
+              res.statusCode.should.equal(200);
+              expect(body).to.be.ok;
+              body.should.be.an('array');
+              body.should.have.length(3);
+              callback();
+            });
+          }],
+          get2: ['get3', (results, callback) => {
+            const urlObj = {
+              protocol: 'https',
+              host: config.server.host,
+              pathname: config['ldn-receiver'].routes.inboxes,
+              query: {
+                owner: altIdentity.identity.id
+              }
+            };
+            request.get(helpers.createHttpSignatureRequest({
+              url: url.format(urlObj),
+              identity: altIdentity
+            }), (err, res, body) => {
+              expect(err).to.not.be.ok;
+              res.statusCode.should.equal(200);
+              expect(body).to.be.ok;
+              body.should.be.an('array');
+              body.should.have.length(2);
+              callback();
+            });
+          }]
+        }, done);
+      });
+      // NOTE: owner query parameter is removed on these requests
+      it('should only get inboxes owned by the actor', done => {
+        const mockIdentity = mockData.identities.regularUser;
+        const altIdentity = mockData.identities.altUser;
+        async.auto({
+          addThreeInboxes: callback => async.times(
+            3, (n, callback) => brLdnInbox.inboxes.add(
+              null, helpers.createRawInbox(mockData),
+              {owner: mockIdentity.identity.id}, callback), callback),
+          addTwoInboxes: callback => async.times(
+            2, (n, callback) => brLdnInbox.inboxes.add(
+              null, helpers.createRawInbox(mockData),
+              {owner: altIdentity.identity.id}, callback), callback),
+          get3: ['addThreeInboxes', 'addTwoInboxes', (results, callback) => {
+            const urlObj = {
+              protocol: 'https',
+              host: config.server.host,
+              pathname: config['ldn-receiver'].routes.inboxes
+            };
+            request.get(helpers.createHttpSignatureRequest({
+              url: url.format(urlObj),
+              identity: mockIdentity
+            }), (err, res, body) => {
+              expect(err).to.not.be.ok;
+              res.statusCode.should.equal(200);
+              expect(body).to.be.ok;
+              body.should.be.an('array');
+              body.should.have.length(3);
+              callback();
+            });
+          }],
+          get2: ['get3', (results, callback) => {
+            const urlObj = {
+              protocol: 'https',
+              host: config.server.host,
+              pathname: config['ldn-receiver'].routes.inboxes
+            };
+            request.get(helpers.createHttpSignatureRequest({
+              url: url.format(urlObj),
+              identity: altIdentity
+            }), (err, res, body) => {
+              expect(err).to.not.be.ok;
+              res.statusCode.should.equal(200);
+              expect(body).to.be.ok;
+              body.should.be.an('array');
+              body.should.have.length(2);
+              callback();
+            });
+          }]
+        }, done);
+      });
+    }); // end regularUser
+    describe('authenticated organization owner', () => {
+      it('should get inboxes', done => {
+        const mockIdentity = mockData.identities.organizationMember;
+        const orgIdentity = mockData.identities.organization;
+        async.auto({
+          add: callback => async.times(
+            3, (n, callback) => brLdnInbox.inboxes.add(
+              null, helpers.createRawInbox(mockData),
+              {owner: orgIdentity.identity.id}, callback), callback),
+          get: ['add', (results, callback) => {
+            const urlObj = {
+              protocol: 'https',
+              host: config.server.host,
+              pathname: config['ldn-receiver'].routes.inboxes,
+              query: {
+                owner: orgIdentity.identity.id
+              }
+            };
+            request.get(helpers.createHttpSignatureRequest({
+              url: url.format(urlObj),
+              identity: mockIdentity
+            }), (err, res, body) => {
+              expect(err).to.not.be.ok;
+              res.statusCode.should.equal(200);
+              expect(body).to.be.ok;
+              body.should.be.an('array');
+              body.should.have.length(3);
+              callback();
+            });
+          }]
+        }, done);
+      });
+    }); // end regularUser
+  }); // end getAll API
 }); // end inbox api

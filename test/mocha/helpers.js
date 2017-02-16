@@ -182,8 +182,13 @@ api.removeCollection = function(collection, callback) {
   });
 };
 
-api.removeCollections = function(callback) {
-  const collectionNames = ['customer', 'eventLog', 'identity', 'publicKey'];
+api.removeCollections = function(collections, callback) {
+  if(typeof collections === 'function') {
+    callback = collections;
+    collections = null;
+  }
+  const collectionNames = collections ? collections :
+    ['customer', 'eventLog', 'identity', 'publicKey'];
   database.openCollections(collectionNames, () => {
     async.each(collectionNames, (collectionName, callback) => {
       database.collections[collectionName].remove({}, callback);
