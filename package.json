@@ -23,7 +23,7 @@
   "peerDependencies": {
     "bedrock": "^1.4.0",
     "bedrock-express": "^2.0.6",
-    "bedrock-ldn-inbox": "^1.0.0",
+    "bedrock-ldn-inbox": "^1.0.2",
     "bedrock-mongodb": "^3.2.0",
     "bedrock-passport": "^3.1.9",
     "bedrock-permission": "^2.4.0",
