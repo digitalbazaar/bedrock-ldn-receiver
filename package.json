@@ -1,6 +1,6 @@
 {
   "name": "bedrock-ldn-receiver",
-  "version": "1.1.2-0",
+  "version": "1.2.0",
   "description": "Bedrock Linked Data Notifications Receiver",
   "main": "./lib",
   "repository": {
