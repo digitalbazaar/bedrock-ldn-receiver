@@ -1,5 +1,10 @@
 # bedrock-ldn-receiver ChangeLog
 
+## 1.2.0 - 2017-03-08
+
+### Added
+- Add `prefers.ld` middleware to inbox and message routes.
+
 ## 1.1.1 - 2017-02-23
 
 ### Fixed
