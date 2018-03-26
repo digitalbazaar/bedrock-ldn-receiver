@@ -1,5 +1,8 @@
 # bedrock-ldn-receiver ChangeLog
 
+### Changed
+- Update `bedrock-mongodb` peer dependency.
+
 ## 1.2.0 - 2017-03-08
 
 ### Added
