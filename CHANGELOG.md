@@ -2,6 +2,7 @@
 
 ### Changed
 - Update `bedrock-mongodb` peer dependency.
+- Update test dependencies.
 
 ## 1.2.0 - 2017-03-08
 
