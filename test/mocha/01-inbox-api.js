@@ -100,7 +100,7 @@ describe('bedrock-ldn-receiver inbox API', () => {
               expect(res.body).to.be.ok;
               res.body.should.be.an('object');
               res.body.id.should.equal(results.add.inbox.id);
-              res.body.contains.should.be.an.array;
+              res.body.contains.should.be.an('array');
               res.body.contains.should.have.length(0);
               callback();
             });
