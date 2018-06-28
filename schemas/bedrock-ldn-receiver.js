@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2017-2018 Digital Bazaar, Inc. All rights reserved.
  */
 const ldnInbox = require('./ldn-inbox');
 const ldnMessage = require('./ldn-message');
