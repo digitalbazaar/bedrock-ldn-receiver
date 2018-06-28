@@ -21,14 +21,14 @@ api.IDENTITY_BASE_PATH = config.server.baseUri +
   config['identity-http'].basePath + '/';
 
 api.createCrytographicIdentity = function(sourceIdentity, callback) {
-  var publicKey = {
+  const publicKey = {
     '@context': 'https://w3id.org/identity/v1',
     id: sourceIdentity.keys.publicKey.id,
     type: 'CryptographicKey',
     owner: sourceIdentity.identity.id,
     publicKeyPem: sourceIdentity.keys.publicKey.publicKeyPem
   };
-  var credential = {
+  const credential = {
     '@context': 'https://w3id.org/identity/v1',
     id: 'urn:ephemeral:' + uuid(),
     type: ['Credential', 'CryptographicKeyCredential'],
@@ -48,7 +48,7 @@ api.createCrytographicIdentity = function(sourceIdentity, callback) {
       if(err) {
         callback(err);
       }
-      var targetIdentity = {
+      const targetIdentity = {
         '@context': 'https://w3id.org/identity/v1',
         id: sourceIdentity.identity.id,
         type: 'Identity',
@@ -95,7 +95,7 @@ api.createMessage = function(mockData, options = {addId: true}) {
 };
 
 api.createHttpSignatureRequest = function(options) {
-  var newRequest = {
+  const newRequest = {
     url: options.url,
     httpSignature: {
       key: options.identity.keys.privateKey.privateKeyPem,
@@ -110,8 +110,8 @@ api.createHttpSignatureRequest = function(options) {
 };
 
 api.createIdentity = function(options) {
-  var userName = options.userName || uuid();
-  var newIdentity = {
+  const userName = options.userName || uuid();
+  const newIdentity = {
     id: config.server.baseUri + config['identity-http'].basePath +
       '/' + userName,
     type: 'Identity',
@@ -226,13 +226,14 @@ function insertTestData(mockData, callback) {
         }
         callback();
       }
-    ], callback), err => {
-      if(err) {
-        if(!database.isDuplicateError(err)) {
-          // duplicate error means test data is already loaded
-          return callback(err);
-        }
+    ], callback),
+  err => {
+    if(err) {
+      if(!database.isDuplicateError(err)) {
+        // duplicate error means test data is already loaded
+        return callback(err);
       }
-      callback();
-    }, callback);
+    }
+    callback();
+  }, callback);
 }
